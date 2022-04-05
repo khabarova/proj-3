@@ -4,19 +4,13 @@ import sqlite3
 from random import randint
 
 # токен бота
-bot = telebot.TeleBot('***')
+bot = telebot.TeleBot('5211894904:AAFbuovu8W1VefPHBOffusDFwSppYqjB_0Q')
 # count_button, для того чтобы обрабатывать только один выбор и только один раз
 count_button = 0
 rand_id = randint(1, 10)
-
-con = sqlite3.connect("base 3.db")
-cur = con.cursor()
-
 # функция для вступления
 @bot.message_handler(content_types=['text'])
 def start(message):
-    if message.text == '/ready':
-        bot.register_next_step_handler(message, time)
     if message.text == '/start':
         global count_button
         count_button = 0
@@ -36,7 +30,6 @@ def start(message):
         question = "Хотите начать?"
         bot.send_message(message.from_user.id, text=question, reply_markup=keyboard)
     if message.text == '/ready':
-        message = bot.send_message(message.chat.id,'Поехали')
         bot.register_next_step_handler(message, time)
     if message.text != '/help' and message.text != '/start' and message.text != '/ready':
         bot.send_message(message.from_user.id, 'Я вас не понимаю( Напишите /help')
@@ -51,13 +44,13 @@ def start(message):
 def callback_worker(call):
     # call.data это callback_data, которую мы указали при объявлении кнопки
     global count_button
+    global rand_id
     if call.data == "yes" and count_button == 0:
         count_button += 1
         bot.send_message(call.message.chat.id, 'Поехали',
                          reply_markup=types.ReplyKeyboardRemove(), parse_mode='Markdown')
-        message = bot.send_message(call.message.chat.id, 'О! Вижу вы решили попытаться пройти квест. Удачи. Для начала выберите'
-                                   'время действий. Напишите /ready.')
-        bot.register_next_step_handler(message, time)
+        bot.send_message(call.message.chat.id, 'О! Вижу вы решили попытаться пройти квест. Удачи. Для начала выберите'
+                                               'время действий. Напишите /ready 2 раза по отдельности')
 
     if call.data == "no" and count_button == 0:
         count_button += 1
@@ -65,15 +58,21 @@ def callback_worker(call):
                          reply_markup=types.ReplyKeyboardRemove(), parse_mode='Markdown')
 
     if call.data == "y" and count_button == 1:
+        con = sqlite3.connect("base3.db")
+        cur = con.cursor()
+
         count_button += 1
         bot.send_message(call.message.chat.id, '''3100 год от Рождества Христово. Галактика Андромеды.
 Планета «NL-31» - ближайшая планета с климатом пригодным для жизни. Человеческая раса перебралась
 жить на эту планету из-за разрушения ядра планеты Земля. Время на планете «NL-31» течет в 2 раза
 медленнее земного, а вместо Солнца – звезда «Мабу».''')
-        bot.send_message(call.message.chat.id, f'''Сегодня день Вашего рождения. 
-Ваше имя - {cur.execute(f'SELECT name FROM user WHERE id={rand_id}')}, Ваша удача - {cur.execute(f'SELECT luck FROM user WHERE id={rand_id}')}, 
-Ваш авторитет- {cur.execute(f'SELECT authority FROM user WHERE id={rand_id}')}, 
-Ваше здоровье - {cur.execute(f'SELECT health FROM user WHERE id={rand_id}')}''')
+        bot.send_message(call.message.chat.id, f'''Сегодня день Вашего рождения.
+Ваше имя - {(cur.execute(f'SELECT name FROM user WHERE id={rand_id}').fetchall())[0][0]}, 
+Ваша удача - {cur.execute(f'SELECT luck FROM user WHERE id={rand_id}').fetchall()[0][0]}, 
+Ваш авторитет- {cur.execute(f'SELECT authority FROM user WHERE id={rand_id}').fetchall()[0][0]}, 
+Ваше здоровье - {cur.execute(f'SELECT health FROM user WHERE id={rand_id}').fetchall()[0][0]}.''')
+    if call.data == "n" and count_button == 1:
+        count_button += 1
 
 
 def time(message):
@@ -87,8 +86,6 @@ def time(message):
     keyboard.add(key_ancient)
     question = "Сетинг квеста:"
     bot.send_message(message.from_user.id, text=question, reply_markup=keyboard)
-
-
 
 
 bot.polling()
