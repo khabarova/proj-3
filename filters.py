@@ -4,7 +4,7 @@ import sqlite3
 from random import randint
 
 # токен бота
-bot = telebot.TeleBot('5211894904:AAFbuovu8W1VefPHBOffusDFwSppYqjB_0Q')
+bot = telebot.TeleBot('//')
 # count_button, для того чтобы обрабатывать 1 нажатие кнопки
 count_button = 0
 # случайное id  для будущего
