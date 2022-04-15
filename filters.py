@@ -4,7 +4,7 @@ import sqlite3
 from random import randint
 
 # токен бота
-bot = telebot.TeleBot('//')
+bot = telebot.TeleBot('5211894904:AAFbuovu8W1VefPHBOffusDFwSppYqjB_0Q')
 # count_button, для того чтобы обрабатывать 1 нажатие кнопки
 count_button = 0
 # случайное id  для будущего
@@ -25,6 +25,8 @@ name2 = (cur.execute(f'SELECT name FROM user WHERE id={rand_id2}').fetchall()[0]
 luck2 = (cur.execute(f'SELECT luck FROM user WHERE id={rand_id2}').fetchall()[0][0])
 authority2 = (cur.execute(f'SELECT authority FROM user WHERE id={rand_id2}').fetchall()[0][0])
 health2 = (cur.execute(f'SELECT health FROM user WHERE id={rand_id2}').fetchall()[0][0])
+
+weapon = 0
 
 
 # функция для вступления
@@ -137,7 +139,8 @@ def callback_worker(call):
         count_button += 1
         # повышение авторитета
         authority1 += 1
-        bot.send_message(call.message.chat.id, '''С Кевином вы стали сидеть за одной партой и довольно сильно сдружились.''')
+        bot.send_message(call.message.chat.id, ''' + АВТОРИТЕТ
+С Кевином вы стали сидеть за одной партой и довольно сильно сдружились.''')
         bot.send_message(call.message.chat.id, '''Так из года в год (все 10 лет) проходит каждый Ваш день:
 школа, домашнее задание, сон.''')
         bot.send_message(call.message.chat.id, '''3 апреля 3116 года. Этот день вы запомните на всю жизнь.
@@ -168,7 +171,8 @@ def callback_worker(call):
         count_button += 1
         # понижение авторитета
         authority1 -= 1
-        bot.send_message(call.message.chat.id, '''Кевин обиделся и всем сказал, что с Вами нельзя дружить. 
+        bot.send_message(call.message.chat.id, ''' - АВТОРИТЕТ
+Кевин обиделся и всем сказал, что с Вами нельзя дружить. 
 Теперь вы сидите в одиночестве.''')
         bot.send_message(call.message.chat.id, '''Так из года в год (все 10 лет) проходит каждый Ваш день:
 школа, домашнее задание, сон.''')
@@ -210,6 +214,55 @@ def callback_worker(call):
 когда следователи скажут точно, то мы либо отпустим Вас, либо будет еще одно заседание суда.''')
         to_turma(call)
 
+    # взять заточку себе
+    if call.data == "only_me" and count_button == 4:
+        count_button += 1
+        global weapon
+        weapon = 1
+        bot.send_message(call.message.chat.id, ''' + ЗАТОЧКА''')
+        do_time(call)
+
+    if call.data == "good_man" and count_button == 4:
+        count_button += 1
+        authority1 += 1
+        bot.send_message(call.message.chat.id, ''' + АВТОРИТЕТ
+Теперь за вас смогут поручиться в случае чего.''')
+        do_time(call)
+
+    if call.data == "ban" and count_button == 4:
+        count_button += 1
+        bot.send_message(call.message.chat.id, '''Теперь вы находитесь под защитой охраны, возможно из-за 
+данного поступка дело раскроется быстрее(детектив поймет, что у вас есть желание сотрудничать)''')
+        do_time(call)
+
+    if call.data == "need" and count_button == 5:
+        count_button += 1
+        weapon = 0
+        bot.send_message(call.message.chat.id, '''Значит есть. ХА ну ты и лох!
+Вас прижали к стене и обыскали''')
+        bot.send_message(call.message.chat.id, '''У ВАС ЗАБРАЛИ ЗАТОЧКУ''')
+
+    if call.data == "no_need" and count_button == 5:
+        count_button += 1
+        bot.send_message(call.message.chat.id, '''Да без проблем, бро.''')
+
+    if call.data == 'help' and count_button == 5:
+        count_button += 1
+        bot.send_message(call.message.chat.id, '''-Отвали от него
+- Кто там пискнул! Тоже хочешь по зубам получить!''')
+        if luck1 >= 4:
+            bot.send_message(call.message.chat.id, '''ВЫСОКИЙ УРОВЕНЬ УДАЧИ
+- Смешной ты, я сказал отвали от него! - Вы вмазали парнь кулоком в солнечное сплетение. 
+Минуты не прошло, как его уже не было''')
+            health1 += 1
+            bot.send_message(call.message.chat.id, '''+ ЗДОРОВЬЕ''')
+        else:
+            bot.send_message(call.message.chat.id, '''Из-за драки вас отправили в карцер''')
+
+    if call.data == 'not_help' and count_button == 5:
+        count_button += 1
+        bot.send_message(call.message.chat.id, '''-Эй ты! Куда пошел! Я еще тебя не потряс''')
+
 
 # БУДУЩЕЕ
 def first_ask_future(message):
@@ -241,7 +294,7 @@ def protest_ask_future(message):
 # БУДУЩЕЕ
 def to_turma(call):
     bot.send_message(call.message.chat.id, '''Вот вы уже едите в автобусе с заключенными. Вы думаете, что нужно с кем-то познакомиться,
-чтобы точно не быть убитыми или отыменными в сраку.''')
+чтобы быть под защитой другого.''')
     global authority1
     if authority1 >= 3:
         bot.send_message(call.message.chat.id, '''ВЫСОКИЙ УРОВЕНЬ АВТОРИТЕТА
@@ -251,7 +304,7 @@ def to_turma(call):
 
     else:
         bot.send_message(call.message.chat.id, '''НИЗКИЙ УРОВЕНЬ АВТОРИТЕТА
-Все подумали, что вы педик и послали вас.''')
+Оказывается заключенные не особо добрые люди.''')
         turma(call)
 
 
@@ -260,11 +313,64 @@ def turma(call):
     if luck1 >= 3:
         bot.send_message(call.message.chat.id, '''ВЫСОКИЙ УРОВЕНЬ УДАЧИ
 Вам повезло, вы с Томом попали в одну камеру и мотать срок будет не так скучно.''')
+        zatochka(call)
     else:
         bot.send_message(call.message.chat.id, '''НИЗКИЙ УРОВЕНЬ УДАЧИ
 Вы в камере одни, мотать срок будет невозможно скучно''')
+        zatochka(call)
 
 
+def zatochka(call):
+    keyboard = types.InlineKeyboardMarkup()
+    # кнопка 1
+    key_only_me = types.InlineKeyboardButton(text=f'Оставите себе', callback_data='only_me')
+    keyboard.add(key_only_me)
+    # кнопка 2
+    key_good_man = types.InlineKeyboardButton(text='Отнесете блатным', callback_data='good_man')
+    keyboard.add(key_good_man)
+    # кнопка 3
+    key_good_man = types.InlineKeyboardButton(text='Отнесете охране', callback_data='ban')
+    keyboard.add(key_good_man)
+    # вопрос
+    question = "Во время прогулки вы нашли заточку, что будете с не делать?"
+    bot.send_message(call.message.chat.id, text=question, reply_markup=keyboard)
+
+
+def do_time(call):
+    bot.send_message(call.message.chat.id, '''Прошел уже месяц отсидки, а про расследование все тихо. Как оказалось в 
+тюрьме не так уж и много развлечений. Можно читать книги либо ходить в качалку, куда вы сейчас и направились.''')
+    if weapon != 1:
+        bot.send_message(call.message.chat.id, '''Вас осанавливает парень''')
+        no_name(call)
+    else:
+        bot.send_message(call.message.chat.id, '''В углу вы видите как какой-то здоровяк прижал паренька''')
+        no_name2(call)
+
+
+def no_name(call):
+    keyboard = types.InlineKeyboardMarkup()
+    # кнопка 1
+    key_need = types.InlineKeyboardButton(text='У меня есть.', callback_data='need')
+    keyboard.add(key_need)
+    # кнопка 2
+    key_no_need = types.InlineKeyboardButton(text='Я пацифист', callback_data='no_need')
+    keyboard.add(key_no_need)
+    # вопрос
+    question = "Эй! Парень, нужна заточка?"
+    bot.send_message(call.message.chat.id, text=question, reply_markup=keyboard)
+
+
+def no_name2(call):
+    keyboard = types.InlineKeyboardMarkup()
+    # кнопка 1
+    key_help = types.InlineKeyboardButton(text='Помочь парню', callback_data='help')
+    keyboard.add(key_help)
+    # кнопка 2
+    key_not_help = types.InlineKeyboardButton(text='Пройти мимо', callback_data='not_help')
+    keyboard.add(key_not_help)
+    # вопрос
+    question = "Хотите вмешаться?"
+    bot.send_message(call.message.chat.id, text=question, reply_markup=keyboard)
 
 
 # ПРОШЛОЕ
